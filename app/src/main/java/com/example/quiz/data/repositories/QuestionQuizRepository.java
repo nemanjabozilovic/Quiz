@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.quiz.data.datasources.databases.DatabaseHelper;
 import com.example.quiz.data.models.QuestionQuiz;
 import com.example.quiz.domain.repositories.IQuestionQuizRepository;
 
@@ -15,15 +16,16 @@ public class QuestionQuizRepository implements IQuestionQuizRepository {
     private static final String COLUMN_QUESTION_ID = "question_id";
     private static final String COLUMN_QUIZ_ID = "quiz_id";
 
-    private final SQLiteDatabase database;
+    private final DatabaseHelper dbHelper;
 
-    public QuestionQuizRepository(SQLiteDatabase database) {
-        this.database = database;
+    public QuestionQuizRepository(DatabaseHelper dbHelper) {
+        this.dbHelper = dbHelper;
     }
 
     @Override
     public List<QuestionQuiz> getQuestionsForQuiz(int quizId) {
         List<QuestionQuiz> questionsForQuiz = new ArrayList<>();
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_QUESTION_QUIZ + " WHERE " + COLUMN_QUIZ_ID + " = ?";
         Cursor cursor = database.rawQuery(query, new String[]{String.valueOf(quizId)});
 
@@ -41,6 +43,7 @@ public class QuestionQuizRepository implements IQuestionQuizRepository {
     @Override
     public List<QuestionQuiz> getQuizzesForQuestion(int questionId) {
         List<QuestionQuiz> quizzesForQuestion = new ArrayList<>();
+        SQLiteDatabase database = dbHelper.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_QUESTION_QUIZ + " WHERE " + COLUMN_QUESTION_ID + " = ?";
         Cursor cursor = database.rawQuery(query, new String[]{String.valueOf(questionId)});
 
@@ -57,6 +60,7 @@ public class QuestionQuizRepository implements IQuestionQuizRepository {
 
     @Override
     public void insertQuestionQuiz(QuestionQuiz questionQuiz) {
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_QUESTION_ID, questionQuiz.getQuestionId());
         values.put(COLUMN_QUIZ_ID, questionQuiz.getQuizId());
@@ -66,6 +70,7 @@ public class QuestionQuizRepository implements IQuestionQuizRepository {
 
     @Override
     public void deleteQuestionQuiz(int questionId, int quizId) {
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
         String whereClause = COLUMN_QUESTION_ID + " = ? AND " + COLUMN_QUIZ_ID + " = ?";
         String[] whereArgs = {String.valueOf(questionId), String.valueOf(quizId)};
 

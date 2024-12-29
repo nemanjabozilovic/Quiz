@@ -22,8 +22,7 @@ public class UserMapper {
                 userDTO.getFirstName(),
                 userDTO.getLastName(),
                 userDTO.getEmail(),
-                null,
-                userDTO.getRole() != null ? userDTO.getRole().getId() : 0
+                null
         );
     }
 }

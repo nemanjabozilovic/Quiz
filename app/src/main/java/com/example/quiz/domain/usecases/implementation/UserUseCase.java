@@ -1,9 +1,14 @@
 package com.example.quiz.domain.usecases.implementation;
 
+import com.example.quiz.data.models.Role;
 import com.example.quiz.data.models.User;
+import com.example.quiz.domain.mappers.RoleMapper;
 import com.example.quiz.domain.mappers.UserMapper;
+import com.example.quiz.domain.models.RoleDTO;
 import com.example.quiz.domain.models.UserDTO;
+import com.example.quiz.domain.repositories.IRoleRepository;
 import com.example.quiz.domain.repositories.IUserRepository;
+import com.example.quiz.domain.repositories.IUserRolesRepository;
 import com.example.quiz.domain.usecases.interfaces.IUserUseCase;
 
 import java.util.ArrayList;
@@ -11,9 +16,13 @@ import java.util.List;
 
 public class UserUseCase implements IUserUseCase {
     private final IUserRepository userRepository;
+    private final IUserRolesRepository userRolesRepository;
+    private final IRoleRepository roleRepository;
 
-    public UserUseCase(IUserRepository userRepository) {
+    public UserUseCase(IUserRepository userRepository, IUserRolesRepository userRolesRepository, IRoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.userRolesRepository = userRolesRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -56,7 +65,14 @@ public class UserUseCase implements IUserUseCase {
     public UserDTO login(String email, String password) {
         User user = userRepository.login(email, password);
         if (user != null) {
-            return UserMapper.toDTO(user, null);
+            List<Integer> roleIds = userRolesRepository.getRolesByUserId(user.getId());
+            if (roleIds != null && !roleIds.isEmpty()) {
+                Integer roleId = roleIds.get(0);
+                Role role = roleRepository.getRoleById(roleId);
+                if (role != null) {
+                    return UserMapper.toDTO(user, role);
+                }
+            }
         }
         return null;
     }

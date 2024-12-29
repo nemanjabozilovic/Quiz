@@ -110,6 +110,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        // Create Tables
         db.execSQL(CREATE_TABLE_ROLES);
         db.execSQL(CREATE_TABLE_USERS);
         db.execSQL(CREATE_TABLE_USER_ROLES);
@@ -133,6 +134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 defaultAdminEmail + "', '" +
                 defaultAdminPassword + "');");
 
+        // Get Admin User ID
         Cursor cursor = db.rawQuery("SELECT " + COLUMN_ID + " FROM " + TABLE_USERS +
                 " WHERE " + COLUMN_EMAIL + " = ?", new String[]{defaultAdminEmail});
         if (cursor.moveToFirst()) {
@@ -141,6 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int adminUserId = cursor.getInt(adminUserIdIndex);
                 cursor.close();
 
+                // Get Admin Role ID
                 cursor = db.rawQuery("SELECT " + COLUMN_ID + " FROM " + TABLE_ROLES +
                         " WHERE " + COLUMN_ROLE_NAME + " = ?", new String[]{"Admin"});
                 if (cursor.moveToFirst()) {
@@ -149,6 +152,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         int adminRoleId = cursor.getInt(adminRoleIdIndex);
                         cursor.close();
 
+                        // Assign Admin Role To Admin User
                         db.execSQL("INSERT INTO " + TABLE_USER_ROLES + " (" +
                                 COLUMN_USER_ID + ", " +
                                 COLUMN_ROLE_ID + ") VALUES (" +
@@ -166,9 +170,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION_QUIZ);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUIZ);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_ROLES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ROLES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_ROLES);
         onCreate(db);
     }
 }

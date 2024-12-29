@@ -2,8 +2,8 @@ package com.example.quiz.data.repositories;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
+import com.example.quiz.data.datasources.databases.DatabaseHelper;
 import com.example.quiz.data.models.User;
 import com.example.quiz.domain.repositories.IUserRepository;
 
@@ -19,82 +19,116 @@ public class UserRepository implements IUserRepository {
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_ROLE_ID = "role_id";
 
-    private final SQLiteDatabase database;
+    private final DatabaseHelper dbHelper;
 
-    public UserRepository(SQLiteDatabase database) {
-        this.database = database;
+    public UserRepository(DatabaseHelper dbHelper) {
+        this.dbHelper = dbHelper;
     }
 
     @Override
     public User getUserById(int userId) {
-        Cursor cursor = database.query(TABLE_USERS, null, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)}, null, null, null);
-        if (cursor.moveToFirst()) {
-            User user = new User(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FIRST_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ROLE_ID))
-            );
-            cursor.close();
-            return user;
+        Cursor cursor = null;
+        try {
+            cursor = queryUserById(userId);
+            if (cursor.moveToFirst()) {
+                return mapCursorToUser(cursor);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        cursor.close();
         return null;
     }
 
     @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        Cursor cursor = database.query(TABLE_USERS, null, null, null, null, null, null);
-        while (cursor.moveToNext()) {
-            users.add(new User(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FIRST_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ROLE_ID))
-            ));
+        Cursor cursor = null;
+        try {
+            cursor = queryAllUsers();
+            while (cursor != null && cursor.moveToNext()) {
+                users.add(mapCursorToUser(cursor));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        cursor.close();
         return users;
     }
 
     @Override
     public boolean insertUser(User user) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_FIRST_NAME, user.getFirstName());
-        values.put(COLUMN_LAST_NAME, user.getLastName());
-        values.put(COLUMN_EMAIL, user.getEmail());
-        values.put(COLUMN_PASSWORD, user.getPassword());
-        values.put(COLUMN_ROLE_ID, user.getRoleId());
-        long result = database.insert(TABLE_USERS, null, values);
+        ContentValues values = mapUserToContentValues(user);
+        long result = dbHelper.getWritableDatabase().insert(TABLE_USERS, null, values);
         return result != -1;
     }
 
     @Override
     public boolean updateUser(User user) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_FIRST_NAME, user.getFirstName());
-        values.put(COLUMN_LAST_NAME, user.getLastName());
-        values.put(COLUMN_EMAIL, user.getEmail());
-        values.put(COLUMN_PASSWORD, user.getPassword());
-        values.put(COLUMN_ROLE_ID, user.getRoleId());
-        int rowsAffected = database.update(TABLE_USERS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(user.getId())});
+        ContentValues values = mapUserToContentValues(user);
+        int rowsAffected = dbHelper.getWritableDatabase().update(
+                TABLE_USERS,
+                values,
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(user.getId())}
+        );
         return rowsAffected > 0;
     }
 
     @Override
     public boolean deleteUser(int userId) {
-        int rowsAffected = database.delete(TABLE_USERS, COLUMN_ID + " = ?", new String[]{String.valueOf(userId)});
+        int rowsAffected = dbHelper.getWritableDatabase().delete(
+                TABLE_USERS,
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(userId)}
+        );
         return rowsAffected > 0;
     }
 
     @Override
     public User login(String email, String password) {
-        Cursor cursor = database.query(
+        Cursor cursor = null;
+        try {
+            cursor = queryUserByEmailAndPassword(email, password);
+            if (cursor.moveToFirst()) {
+                return mapCursorToUser(cursor);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return null;
+    }
+
+    private Cursor queryUserById(int userId) {
+        return dbHelper.getReadableDatabase().query(
+                TABLE_USERS,
+                null,
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(userId)},
+                null,
+                null,
+                null
+        );
+    }
+
+    private Cursor queryAllUsers() {
+        return dbHelper.getReadableDatabase().query(
+                TABLE_USERS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
+    private Cursor queryUserByEmailAndPassword(String email, String password) {
+        return dbHelper.getReadableDatabase().query(
                 TABLE_USERS,
                 null,
                 COLUMN_EMAIL + " = ? AND " + COLUMN_PASSWORD + " = ?",
@@ -103,19 +137,24 @@ public class UserRepository implements IUserRepository {
                 null,
                 null
         );
-        if (cursor.moveToFirst()) {
-            User user = new User(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FIRST_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ROLE_ID))
-            );
-            cursor.close();
-            return user;
-        }
-        cursor.close();
-        return null;
+    }
+
+    private User mapCursorToUser(Cursor cursor) {
+        return new User(
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FIRST_NAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LAST_NAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD))
+        );
+    }
+
+    private ContentValues mapUserToContentValues(User user) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_FIRST_NAME, user.getFirstName());
+        values.put(COLUMN_LAST_NAME, user.getLastName());
+        values.put(COLUMN_EMAIL, user.getEmail());
+        values.put(COLUMN_PASSWORD, user.getPassword());
+        return values;
     }
 }

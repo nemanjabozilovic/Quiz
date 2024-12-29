@@ -2,8 +2,8 @@ package com.example.quiz.data.repositories;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
+import com.example.quiz.data.datasources.databases.DatabaseHelper;
 import com.example.quiz.data.models.Quiz;
 import com.example.quiz.domain.repositories.IQuizRepository;
 
@@ -16,64 +16,84 @@ public class QuizRepository implements IQuizRepository {
     private static final String COLUMN_TOTAL_NUMBER_OF_POINTS = "total_number_of_points";
     private static final String COLUMN_DATE = "date";
 
-    private final SQLiteDatabase database;
+    private final DatabaseHelper dbHelper;
 
-    public QuizRepository(SQLiteDatabase database) {
-        this.database = database;
+    public QuizRepository(DatabaseHelper dbHelper) {
+        this.dbHelper = dbHelper;
     }
 
     @Override
     public Quiz getQuizById(int quizId) {
-        Cursor cursor = database.query(TABLE_QUIZ, null, COLUMN_ID + " = ?", new String[]{String.valueOf(quizId)}, null, null, null);
-        if (cursor.moveToFirst()) {
-            Quiz quiz = new Quiz(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_NUMBER_OF_POINTS)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
-            );
-            cursor.close();
-            return quiz;
+        Cursor cursor = null;
+        try {
+            cursor = queryQuizById(quizId);
+            if (cursor != null && cursor.moveToFirst()) {
+                return mapCursorToQuiz(cursor);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        cursor.close();
         return null;
     }
 
     @Override
     public List<Quiz> getAllQuizzes() {
         List<Quiz> quizzes = new ArrayList<>();
-        Cursor cursor = database.query(TABLE_QUIZ, null, null, null, null, null, null);
-        while (cursor.moveToNext()) {
-            quizzes.add(new Quiz(
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_NUMBER_OF_POINTS)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
-            ));
+        Cursor cursor = null;
+        try {
+            cursor = queryAllQuizzes();
+            while (cursor != null && cursor.moveToNext()) {
+                quizzes.add(mapCursorToQuiz(cursor));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        cursor.close();
         return quizzes;
     }
 
     @Override
     public boolean insertQuiz(Quiz quiz) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_TOTAL_NUMBER_OF_POINTS, quiz.getTotalNumberOfPoints());
-        values.put(COLUMN_DATE, quiz.getDate());
-        long result = database.insert(TABLE_QUIZ, null, values);
+        ContentValues values = mapQuizToContentValues(quiz);
+        long result = dbHelper.getWritableDatabase().insert(TABLE_QUIZ, null, values);
         return result != -1;
     }
 
     @Override
     public boolean updateQuiz(Quiz quiz) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_TOTAL_NUMBER_OF_POINTS, quiz.getTotalNumberOfPoints());
-        values.put(COLUMN_DATE, quiz.getDate());
-        int rowsAffected = database.update(TABLE_QUIZ, values, COLUMN_ID + " = ?", new String[]{String.valueOf(quiz.getId())});
+        ContentValues values = mapQuizToContentValues(quiz);
+        int rowsAffected = dbHelper.getWritableDatabase().update(TABLE_QUIZ, values, COLUMN_ID + " = ?", new String[]{String.valueOf(quiz.getId())});
         return rowsAffected > 0;
     }
 
     @Override
     public boolean deleteQuiz(int quizId) {
-        int rowsAffected = database.delete(TABLE_QUIZ, COLUMN_ID + " = ?", new String[]{String.valueOf(quizId)});
+        int rowsAffected = dbHelper.getWritableDatabase().delete(TABLE_QUIZ, COLUMN_ID + " = ?", new String[]{String.valueOf(quizId)});
         return rowsAffected > 0;
+    }
+
+    private Cursor queryQuizById(int quizId) {
+        return dbHelper.getReadableDatabase().query(TABLE_QUIZ, null, COLUMN_ID + " = ?", new String[]{String.valueOf(quizId)}, null, null, null);
+    }
+
+    private Cursor queryAllQuizzes() {
+        return dbHelper.getReadableDatabase().query(TABLE_QUIZ, null, null, null, null, null, null);
+    }
+
+    private Quiz mapCursorToQuiz(Cursor cursor) {
+        int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+        int totalPoints = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_NUMBER_OF_POINTS));
+        String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
+        return new Quiz(id, totalPoints, date);
+    }
+
+    private ContentValues mapQuizToContentValues(Quiz quiz) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TOTAL_NUMBER_OF_POINTS, quiz.getTotalNumberOfPoints());
+        values.put(COLUMN_DATE, quiz.getDate());
+        return values;
     }
 }
