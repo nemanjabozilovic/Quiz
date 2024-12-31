@@ -1,6 +1,9 @@
 package com.example.quiz.domain.models;
 
-public class RoleDTO {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class RoleDTO implements Parcelable {
     private int id;
     private String roleName;
 
@@ -9,6 +12,34 @@ public class RoleDTO {
     public RoleDTO(int id, String roleName) {
         this.id = id;
         this.roleName = roleName;
+    }
+
+    protected RoleDTO(Parcel in) {
+        id = in.readInt();
+        roleName = in.readString();
+    }
+
+    public static final Creator<RoleDTO> CREATOR = new Creator<RoleDTO>() {
+        @Override
+        public RoleDTO createFromParcel(Parcel in) {
+            return new RoleDTO(in);
+        }
+
+        @Override
+        public RoleDTO[] newArray(int size) {
+            return new RoleDTO[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(roleName);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public int getId() {

@@ -17,7 +17,6 @@ public class UserRepository implements IUserRepository {
     private static final String COLUMN_LAST_NAME = "last_name";
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_PASSWORD = "password";
-    private static final String COLUMN_ROLE_ID = "role_id";
 
     private final DatabaseHelper dbHelper;
 
@@ -59,10 +58,15 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
-    public boolean insertUser(User user) {
+    public User insertUser(User user) {
         ContentValues values = mapUserToContentValues(user);
         long result = dbHelper.getWritableDatabase().insert(TABLE_USERS, null, values);
-        return result != -1;
+
+        if (result != -1) {
+            user.setId((int) result);
+            return user;
+        }
+        return null;
     }
 
     @Override

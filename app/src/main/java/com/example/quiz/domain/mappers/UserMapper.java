@@ -12,6 +12,7 @@ public class UserMapper {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getPassword(),
                 new RoleDTO(role.getId(), role.getRoleName())
         );
     }
@@ -22,7 +23,7 @@ public class UserMapper {
                 userDTO.getFirstName(),
                 userDTO.getLastName(),
                 userDTO.getEmail(),
-                null
+                userDTO.getPassword()
         );
     }
 }

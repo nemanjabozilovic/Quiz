@@ -1,9 +1,8 @@
 package com.example.quiz.ui.activities;
 
-import android.database.sqlite.SQLiteDatabase;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -59,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
         loginButton.setOnClickListener(v -> handleLogin());
     }
 
-    private void handleLogin() {
+    public void handleLogin() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(MainActivity.this, "Please enter both email and password", Toast.LENGTH_SHORT).show();
+            showToast("Please enter both email and password");
             return;
         }
 
@@ -72,12 +71,19 @@ public class MainActivity extends AppCompatActivity {
             UserDTO userDTO = userUseCase.login(email, password);
 
             if (userDTO != null) {
-                Toast.makeText(MainActivity.this, "Login successful: " + userDTO.getFirstName(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                intent.putExtra("userDTO", userDTO);
+                startActivity(intent);
+                finish();
             } else {
-                Toast.makeText(MainActivity.this, "Invalid email or password", Toast.LENGTH_SHORT).show();
+                showToast("Invalid email or password");
             }
         } catch (Exception e) {
-            Toast.makeText(MainActivity.this, "An error occurred during login", Toast.LENGTH_SHORT).show();
+            showToast("An error occurred during login");
         }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 }
