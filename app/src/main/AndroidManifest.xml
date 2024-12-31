@@ -44,6 +44,10 @@
             android:name=".ui.activities.AddQuestionActivity"
             android:theme="@style/Theme.Quiz">
         </activity>
+        <activity
+            android:name=".ui.activities.EditQuestionActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
     </application>
 
 </manifest>

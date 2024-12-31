@@ -15,7 +15,7 @@ import java.util.List;
 
 public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.UserViewHolder> {
     private List<UserDTO> users;
-    private OnUserClickListener listener;
+    private final OnUserClickListener listener;
 
     public UsersAdapter(List<UserDTO> users, OnUserClickListener listener) {
         this.users = users;

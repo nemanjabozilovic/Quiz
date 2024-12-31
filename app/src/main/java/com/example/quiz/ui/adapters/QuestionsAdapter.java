@@ -14,7 +14,7 @@ import java.util.List;
 
 public class QuestionsAdapter extends RecyclerView.Adapter<QuestionsAdapter.QuestionViewHolder> {
     private List<QuestionDTO> questions;
-    private OnQuestionClickListener listener;
+    private final OnQuestionClickListener listener;
 
     public QuestionsAdapter(List<QuestionDTO> questions, OnQuestionClickListener listener) {
         this.questions = questions;

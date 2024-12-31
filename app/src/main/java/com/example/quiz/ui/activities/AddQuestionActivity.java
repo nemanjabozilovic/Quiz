@@ -1,7 +1,6 @@
 package com.example.quiz.ui.activities;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,7 +16,6 @@ import com.example.quiz.domain.usecases.implementation.QuestionUseCase;
 public class AddQuestionActivity extends AppCompatActivity {
 
     private EditText etQuestionText, etOption1, etOption2, etOption3, etOption4, etOption5, etCorrectAnswer, etNumberOfPoints;
-    private Button btnAddQuestion;
 
     private QuestionUseCase questionUseCase;
 
@@ -34,7 +32,7 @@ public class AddQuestionActivity extends AppCompatActivity {
         etOption5 = findViewById(R.id.etOption5);
         etCorrectAnswer = findViewById(R.id.etCorrectAnswer);
         etNumberOfPoints = findViewById(R.id.etNumberOfPoints);
-        btnAddQuestion = findViewById(R.id.btnAddQuestion);
+        Button btnAddQuestion = findViewById(R.id.btnAddQuestion);
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         questionUseCase = new QuestionUseCase(new QuestionRepository(dbHelper));

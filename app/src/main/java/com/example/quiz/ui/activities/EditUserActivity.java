@@ -30,10 +30,8 @@ import java.util.List;
 public class EditUserActivity extends AppCompatActivity {
     private EditText etFirstName, etLastName, etEmail;
     private Spinner spinnerRole;
-    private Button btnSave;
     private UserDTO userDTO;
     private IUserUseCase userUseCase;
-    private IRoleUseCase roleUseCase;
     private IUserRolesUseCase userRolesUseCase;
     private List<RoleDTO> rolesList = new ArrayList<>();
 
@@ -50,7 +48,7 @@ public class EditUserActivity extends AppCompatActivity {
         etLastName = findViewById(R.id.etLastName);
         etEmail = findViewById(R.id.etEmail);
         spinnerRole = findViewById(R.id.spinnerRole);
-        btnSave = findViewById(R.id.btnSave);
+        Button btnSave = findViewById(R.id.btnSave);
 
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         userUseCase = new UserUseCase(
@@ -58,7 +56,7 @@ public class EditUserActivity extends AppCompatActivity {
                 new UserRolesRepository(dbHelper),
                 new RoleRepository(dbHelper)
         );
-        roleUseCase = new RoleUseCase(new RoleRepository(dbHelper));
+        IRoleUseCase roleUseCase = new RoleUseCase(new RoleRepository(dbHelper));
         userRolesUseCase = new UserRolesUseCase(
                 new UserRolesRepository(dbHelper),
                 new RoleRepository(dbHelper)
