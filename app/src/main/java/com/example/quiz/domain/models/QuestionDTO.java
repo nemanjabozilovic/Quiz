@@ -1,6 +1,9 @@
 package com.example.quiz.domain.models;
 
-public class QuestionDTO {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class QuestionDTO implements Parcelable {
     private int id;
     private String text;
     private String option1;
@@ -23,6 +26,48 @@ public class QuestionDTO {
         this.option5 = option5;
         this.correctAnswer = correctAnswer;
         this.numberOfPoints = numberOfPoints;
+    }
+
+    protected QuestionDTO(Parcel in) {
+        id = in.readInt();
+        text = in.readString();
+        option1 = in.readString();
+        option2 = in.readString();
+        option3 = in.readString();
+        option4 = in.readString();
+        option5 = in.readString();
+        correctAnswer = in.readString();
+        numberOfPoints = in.readInt();
+    }
+
+    public static final Creator<QuestionDTO> CREATOR = new Creator<QuestionDTO>() {
+        @Override
+        public QuestionDTO createFromParcel(Parcel in) {
+            return new QuestionDTO(in);
+        }
+
+        @Override
+        public QuestionDTO[] newArray(int size) {
+            return new QuestionDTO[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(text);
+        dest.writeString(option1);
+        dest.writeString(option2);
+        dest.writeString(option3);
+        dest.writeString(option4);
+        dest.writeString(option5);
+        dest.writeString(correctAnswer);
+        dest.writeInt(numberOfPoints);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     public int getId() {

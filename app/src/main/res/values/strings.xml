@@ -20,4 +20,17 @@
     <string name="enter_last_name">Enter last name</string>
     <string name="enter_email">Enter email</string>
     <string name="enter_password">Enter password</string>
+    <string name="question_title">Questions</string>
+    <string name="question_option_1">Option 1</string>
+    <string name="question_option_2">Option 2</string>
+    <string name="question_option_3">Option 3</string>
+    <string name="question_option_4">Option 4</string>
+    <string name="question_option_5">Option 5</string>
+    <string name="question_correct_answer">Correct Answer</string>
+    <string name="question_points">Points</string>
+    <string name="button_start_quiz">Start Quiz</string>
+    <string name="question_placeholder">Enter question text</string>
+    <string name="button_add_question">Add Question</string>
+    <string name="button_edit_question">Edit Question</string>
+    <string name="button_delete_question">Delete Question</string>
 </resources>

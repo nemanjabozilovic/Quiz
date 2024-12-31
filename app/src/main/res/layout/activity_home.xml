@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Header with User's full name and Logout button -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -31,7 +30,6 @@
             android:layout_marginRight="16dp" />
     </RelativeLayout>
 
-    <!-- Centered buttons for Admin and non-Admin users -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -40,7 +38,6 @@
         android:gravity="center"
         android:padding="16dp">
 
-        <!-- Only visible for Admin users -->
         <Button
             android:id="@+id/usersButton"
             android:layout_width="wrap_content"
@@ -62,7 +59,6 @@
             android:text="@string/quizzes"
             android:visibility="gone" />
 
-        <!-- Always visible for all users -->
         <Button
             android:id="@+id/startQuizButton"
             android:layout_width="wrap_content"

@@ -29,4 +29,5 @@
         android:src="@drawable/ic_delete"
         android:layout_marginStart="8dp"
         android:layout_gravity="center_vertical" />
+
 </LinearLayout>
