@@ -69,11 +69,65 @@ public class QuestionQuizRepository implements IQuestionQuizRepository {
     }
 
     @Override
-    public void deleteQuestionQuiz(int questionId, int quizId) {
+    public int deleteQuestionQuiz(int questionId, int quizId) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         String whereClause = COLUMN_QUESTION_ID + " = ? AND " + COLUMN_QUIZ_ID + " = ?";
         String[] whereArgs = {String.valueOf(questionId), String.valueOf(quizId)};
 
-        database.delete(TABLE_QUESTION_QUIZ, whereClause, whereArgs);
+        return database.delete(TABLE_QUESTION_QUIZ, whereClause, whereArgs);
+    }
+
+    @Override
+    public int getNumberOfQuestionsForQuiz(int quizId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_QUESTION_QUIZ + " WHERE " + COLUMN_QUIZ_ID + " = ?", new String[]{String.valueOf(quizId)});
+        int count = 0;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+            cursor.close();
+        }
+
+        return count;
+    }
+
+    @Override
+    public int deleteAllQuestionsForQuiz(int quizId) {
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        String whereClause = COLUMN_QUIZ_ID + " = ?";
+        String[] whereArgs = {String.valueOf(quizId)};
+
+        return database.delete(TABLE_QUESTION_QUIZ, whereClause, whereArgs);
+    }
+
+    @Override
+    public boolean updateQuestionsForQuiz(int quizId, List<QuestionQuiz> newQuestions) {
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        database.beginTransaction();
+        boolean isSuccessful = false;
+        try {
+            String whereClause = COLUMN_QUIZ_ID + " = ?";
+            String[] whereArgs = {String.valueOf(quizId)};
+            database.delete(TABLE_QUESTION_QUIZ, whereClause, whereArgs);
+
+            ContentValues values = new ContentValues();
+            for (QuestionQuiz questionQuiz : newQuestions) {
+                values.clear();
+                values.put(COLUMN_QUESTION_ID, questionQuiz.getQuestionId());
+                values.put(COLUMN_QUIZ_ID, quizId);
+                long result = database.insert(TABLE_QUESTION_QUIZ, null, values);
+                if (result == -1) { return false; }
+            }
+
+            database.setTransactionSuccessful();
+            isSuccessful = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            database.endTransaction();
+        }
+
+        return isSuccessful;
     }
 }

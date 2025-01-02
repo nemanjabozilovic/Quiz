@@ -48,6 +48,22 @@
             android:name=".ui.activities.EditQuestionActivity"
             android:theme="@style/Theme.Quiz">
         </activity>
+        <activity
+            android:name=".ui.activities.QuizzesActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
+        <activity
+            android:name=".ui.activities.AddQuizActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
+        <activity
+            android:name=".ui.activities.EditQuizActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
+        <activity
+            android:name=".ui.activities.SelectQuestionsActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
     </application>
 
 </manifest>

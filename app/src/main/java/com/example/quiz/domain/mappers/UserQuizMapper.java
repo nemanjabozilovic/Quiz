@@ -5,10 +5,10 @@ import com.example.quiz.domain.models.UserQuizDTO;
 
 public class UserQuizMapper {
     public static UserQuizDTO toDTO(UserQuiz userQuiz) {
-        return new UserQuizDTO(userQuiz.getUserId(), userQuiz.getQuizId());
+        return new UserQuizDTO(userQuiz.getUserId(), userQuiz.getQuizId(), userQuiz.getTotalNumberOfPoints());
     }
 
     public static UserQuiz toModel(UserQuizDTO userQuizDTO) {
-        return new UserQuiz(userQuizDTO.getUserId(), userQuizDTO.getQuizId());
+        return new UserQuiz(userQuizDTO.getUserId(), userQuizDTO.getQuizId(), userQuizDTO.getTotalNumberOfPoints());
     }
 }

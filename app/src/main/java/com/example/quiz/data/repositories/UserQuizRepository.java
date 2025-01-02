@@ -14,6 +14,7 @@ public class UserQuizRepository implements IUserQuizRepository {
     private static final String TABLE_USER_QUIZ = "user_quiz";
     private static final String COLUMN_USER_ID = "user_id";
     private static final String COLUMN_QUIZ_ID = "quiz_id";
+    private static final String COLUMN_TOTAL_NUMBER_OF_POINTS = "total_number_of_points";
 
     private final DatabaseHelper dbHelper;
 
@@ -97,13 +98,15 @@ public class UserQuizRepository implements IUserQuizRepository {
     private UserQuiz mapCursorToUserQuiz(Cursor cursor) {
         int userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID));
         int quizId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_QUIZ_ID));
-        return new UserQuiz(userId, quizId);
+        int totalPoints = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_NUMBER_OF_POINTS));
+        return new UserQuiz(userId, quizId, totalPoints);
     }
 
     private ContentValues mapUserQuizToContentValues(UserQuiz userQuiz) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, userQuiz.getUserId());
         values.put(COLUMN_QUIZ_ID, userQuiz.getQuizId());
+        values.put(COLUMN_TOTAL_NUMBER_OF_POINTS, userQuiz.getTotalNumberOfPoints());
         return values;
     }
 }

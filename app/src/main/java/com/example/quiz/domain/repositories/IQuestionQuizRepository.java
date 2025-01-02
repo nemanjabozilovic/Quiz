@@ -8,5 +8,8 @@ public interface IQuestionQuizRepository {
     List<QuestionQuiz> getQuestionsForQuiz(int quizId);
     List<QuestionQuiz> getQuizzesForQuestion(int questionId);
     void insertQuestionQuiz(QuestionQuiz questionQuiz);
-    void deleteQuestionQuiz(int questionId, int quizId);
+    int deleteQuestionQuiz(int questionId, int quizId);
+    int getNumberOfQuestionsForQuiz(int quizId);
+    int deleteAllQuestionsForQuiz(int quizId);
+    boolean updateQuestionsForQuiz(int quizId, List<QuestionQuiz> newQuestions);
 }

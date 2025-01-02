@@ -93,5 +93,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void navigateToQuizzes() {
+        Intent intent = new Intent(this, QuizzesActivity.class);
+        intent.putExtra("currentUser", currentUser);
+        startActivity(intent);
     }
 }

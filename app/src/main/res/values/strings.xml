@@ -33,4 +33,10 @@
     <string name="button_add_question">Add Question</string>
     <string name="button_edit_question">Edit Question</string>
     <string name="button_delete_question">Delete Question</string>
+    <string name="quiz_name">Quiz Name</string>
+    <string name="quiz_date">Pick Quiz Creation Date</string>
+    <string name="button_add_quiz">Add Quiz</string>
+    <string name="button_add_questions_to_quiz">Add Selected Questions</string>
+    <string name="button_add_questions">Add Questions</string>
+    <string name="button_edit_questions">Edit Questions</string>
 </resources>

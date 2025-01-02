@@ -10,4 +10,5 @@ public interface IQuizUseCase {
     boolean insertQuiz(QuizDTO quizDTO);
     boolean updateQuiz(QuizDTO quizDTO);
     boolean deleteQuiz(int quizId);
+    int getLastQuizId();
 }

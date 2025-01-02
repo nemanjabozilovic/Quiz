@@ -1,8 +1,10 @@
 package com.example.quiz.domain.usecases.implementation;
 
 import com.example.quiz.data.models.Quiz;
+import com.example.quiz.domain.mappers.QuestionMapper;
 import com.example.quiz.domain.mappers.QuizMapper;
 import com.example.quiz.domain.models.QuizDTO;
+import com.example.quiz.domain.repositories.IQuestionQuizRepository;
 import com.example.quiz.domain.repositories.IQuizRepository;
 import com.example.quiz.domain.usecases.interfaces.IQuizUseCase;
 
@@ -11,9 +13,11 @@ import java.util.List;
 
 public class QuizUseCase implements IQuizUseCase {
     private final IQuizRepository quizRepository;
+    private final IQuestionQuizRepository questionQuizRepository;
 
-    public QuizUseCase(IQuizRepository quizRepository) {
+    public QuizUseCase(IQuizRepository quizRepository, IQuestionQuizRepository questionQuizRepository) {
         this.quizRepository = quizRepository;
+        this.questionQuizRepository = questionQuizRepository;
     }
 
     @Override
@@ -49,6 +53,15 @@ public class QuizUseCase implements IQuizUseCase {
 
     @Override
     public boolean deleteQuiz(int quizId) {
+        if(questionQuizRepository.deleteAllQuestionsForQuiz(quizId) < 0) { return  false; }
         return quizRepository.deleteQuiz(quizId);
+    }
+
+    public int getLastQuizId() {
+        List<QuizDTO> quizzes = QuizMapper.toDTO(quizRepository.getAllQuizzes());
+        if (quizzes.isEmpty()) {
+            return -1;
+        }
+        return quizzes.get(quizzes.size() - 1).getId();
     }
 }

@@ -2,14 +2,14 @@ package com.example.quiz.data.models;
 
 public class Quiz {
     private int id;
-    private int totalNumberOfPoints;
+    private String quizName;
     private String date;
 
     public Quiz() {}
 
-    public Quiz(int id, int totalNumberOfPoints, String date) {
+    public Quiz(int id, String quizName, String date) {
         this.id = id;
-        this.totalNumberOfPoints = totalNumberOfPoints;
+        this.quizName = quizName;
         this.date = date;
     }
 
@@ -21,19 +21,19 @@ public class Quiz {
         this.id = id;
     }
 
-    public int getTotalNumberOfPoints() {
-        return totalNumberOfPoints;
-    }
-
-    public void setTotalNumberOfPoints(int totalNumberOfPoints) {
-        this.totalNumberOfPoints = totalNumberOfPoints;
-    }
-
     public String getDate() {
         return date;
     }
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getQuizName() {
+        return quizName;
+    }
+
+    public void setQuizName(String quizName) {
+        this.quizName = quizName;
     }
 }

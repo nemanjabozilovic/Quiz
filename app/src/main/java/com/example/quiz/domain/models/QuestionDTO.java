@@ -13,6 +13,7 @@ public class QuestionDTO implements Parcelable {
     private String option5;
     private String correctAnswer;
     private int numberOfPoints;
+    private boolean selected;
 
     public QuestionDTO() {}
 
@@ -26,6 +27,7 @@ public class QuestionDTO implements Parcelable {
         this.option5 = option5;
         this.correctAnswer = correctAnswer;
         this.numberOfPoints = numberOfPoints;
+        this.selected = false;
     }
 
     protected QuestionDTO(Parcel in) {
@@ -38,6 +40,7 @@ public class QuestionDTO implements Parcelable {
         option5 = in.readString();
         correctAnswer = in.readString();
         numberOfPoints = in.readInt();
+        selected = in.readByte() != 0;
     }
 
     public static final Creator<QuestionDTO> CREATOR = new Creator<QuestionDTO>() {
@@ -63,6 +66,7 @@ public class QuestionDTO implements Parcelable {
         dest.writeString(option5);
         dest.writeString(correctAnswer);
         dest.writeInt(numberOfPoints);
+        dest.writeByte((byte) (selected ? 1 : 0));
     }
 
     @Override
@@ -140,5 +144,13 @@ public class QuestionDTO implements Parcelable {
 
     public void setNumberOfPoints(int numberOfPoints) {
         this.numberOfPoints = numberOfPoints;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

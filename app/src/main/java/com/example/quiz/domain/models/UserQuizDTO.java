@@ -3,12 +3,14 @@ package com.example.quiz.domain.models;
 public class UserQuizDTO {
     private int userId;
     private int quizId;
+    private int totalNumberOfPoints;
 
     public UserQuizDTO() {}
 
-    public UserQuizDTO(int userId, int quizId) {
+    public UserQuizDTO(int userId, int quizId, int totalNumberOfPoints) {
         this.userId = userId;
         this.quizId = quizId;
+        this.totalNumberOfPoints = totalNumberOfPoints;
     }
 
     public int getUserId() {
@@ -25,5 +27,13 @@ public class UserQuizDTO {
 
     public void setQuizId(int quizId) {
         this.quizId = quizId;
+    }
+
+    public int getTotalNumberOfPoints() {
+        return totalNumberOfPoints;
+    }
+
+    public void setTotalNumberOfPoints(int totalNumberOfPoints) {
+        this.totalNumberOfPoints = totalNumberOfPoints;
     }
 }

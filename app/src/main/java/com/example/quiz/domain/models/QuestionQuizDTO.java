@@ -26,4 +26,11 @@ public class QuestionQuizDTO {
     public void setQuizId(int quizId) {
         this.quizId = quizId;
     }
+
+    public static QuestionQuizDTO fromQuestionDTO(QuestionDTO questionDTO) {
+        if (questionDTO == null) {
+            return null;
+        }
+        return new QuestionQuizDTO(questionDTO.getId(), 0);
+    }
 }

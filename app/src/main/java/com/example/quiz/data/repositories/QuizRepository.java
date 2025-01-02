@@ -13,7 +13,7 @@ import java.util.List;
 public class QuizRepository implements IQuizRepository {
     private static final String TABLE_QUIZ = "quiz";
     private static final String COLUMN_ID = "id";
-    private static final String COLUMN_TOTAL_NUMBER_OF_POINTS = "total_number_of_points";
+    private static final String COLUMN_QUIZ_NAME = "quiz_name";
     private static final String COLUMN_DATE = "date";
 
     private final DatabaseHelper dbHelper;
@@ -85,14 +85,14 @@ public class QuizRepository implements IQuizRepository {
 
     private Quiz mapCursorToQuiz(Cursor cursor) {
         int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-        int totalPoints = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_NUMBER_OF_POINTS));
         String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
-        return new Quiz(id, totalPoints, date);
+        String quizName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_QUIZ_NAME));
+        return new Quiz(id, quizName, date);
     }
 
     private ContentValues mapQuizToContentValues(Quiz quiz) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_TOTAL_NUMBER_OF_POINTS, quiz.getTotalNumberOfPoints());
+        values.put(COLUMN_QUIZ_NAME, quiz.getQuizName());
         values.put(COLUMN_DATE, quiz.getDate());
         return values;
     }
