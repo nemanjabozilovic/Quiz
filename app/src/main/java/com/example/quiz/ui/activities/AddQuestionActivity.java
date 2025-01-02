@@ -14,8 +14,8 @@ import com.example.quiz.domain.models.QuestionDTO;
 import com.example.quiz.domain.usecases.implementation.QuestionUseCase;
 
 public class AddQuestionActivity extends AppCompatActivity {
-
     private EditText etQuestionText, etOption1, etOption2, etOption3, etOption4, etOption5, etCorrectAnswer, etNumberOfPoints;
+    private Button btnAddQuestion;
 
     private QuestionUseCase questionUseCase;
 
@@ -24,6 +24,12 @@ public class AddQuestionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_question);
 
+        initializeUIElements();
+        initializeDependencies();
+        setupListeners();
+    }
+
+    private void initializeUIElements() {
         etQuestionText = findViewById(R.id.etQuestionText);
         etOption1 = findViewById(R.id.etOption1);
         etOption2 = findViewById(R.id.etOption2);
@@ -32,11 +38,15 @@ public class AddQuestionActivity extends AppCompatActivity {
         etOption5 = findViewById(R.id.etOption5);
         etCorrectAnswer = findViewById(R.id.etCorrectAnswer);
         etNumberOfPoints = findViewById(R.id.etNumberOfPoints);
-        Button btnAddQuestion = findViewById(R.id.btnAddQuestion);
+        btnAddQuestion = findViewById(R.id.btnAddQuestion);
+    }
 
+    private void initializeDependencies() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         questionUseCase = new QuestionUseCase(new QuestionRepository(dbHelper));
+    }
 
+    private void setupListeners() {
         btnAddQuestion.setOnClickListener(v -> addQuestion());
     }
 
@@ -50,30 +60,24 @@ public class AddQuestionActivity extends AppCompatActivity {
         String correctAnswer = etCorrectAnswer.getText().toString();
         String pointsStr = etNumberOfPoints.getText().toString();
 
-        if (questionText.isEmpty() ||
-                option1.isEmpty() ||
-                option2.isEmpty() ||
-                option3.isEmpty() ||
-                option4.isEmpty() ||
-                option5.isEmpty() ||
-                correctAnswer.isEmpty() ||
-                pointsStr.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        if (questionText.isEmpty() || option1.isEmpty() || option2.isEmpty() ||
+                option3.isEmpty() || option4.isEmpty() || option5.isEmpty() ||
+                correctAnswer.isEmpty() || pointsStr.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         int points = Integer.parseInt(pointsStr);
-
         QuestionDTO questionDTO = new QuestionDTO(0, questionText, option1, option2, option3, option4, option5, correctAnswer, points);
 
         boolean success = questionUseCase.insertQuestion(questionDTO);
 
         if (success) {
-            Toast.makeText(this, "Question added successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Question added successfully.", Toast.LENGTH_SHORT).show();
             setResult(RESULT_OK);
             finish();
         } else {
-            Toast.makeText(this, "Failed to add question", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to add question.", Toast.LENGTH_SHORT).show();
         }
     }
 }

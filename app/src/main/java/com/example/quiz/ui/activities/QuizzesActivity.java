@@ -23,6 +23,8 @@ import com.example.quiz.ui.adapters.QuizzesAdapter;
 import java.util.List;
 
 public class QuizzesActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private Button btnAddQuiz;
     private QuizzesAdapter quizzesAdapter;
     private QuizUseCase quizUseCase;
     private QuestionQuizUseCase questionQuizUseCase;
@@ -32,22 +34,43 @@ public class QuizzesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quizzes);
 
-        RecyclerView recyclerView = findViewById(R.id.rvQuizzes);
-        Button btnAddQuiz = findViewById(R.id.btnAddQuiz);
+        initializeDependencies();
+        initializeUIElements();
+        setupListeners();
+        setupRecyclerView();
+        loadQuizzes();
+    }
 
+    private void initializeDependencies() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         quizUseCase = new QuizUseCase(new QuizRepository(dbHelper), new QuestionQuizRepository(dbHelper));
         questionQuizUseCase = new QuestionQuizUseCase(new QuestionQuizRepository(dbHelper), new QuestionRepository(dbHelper));
+    }
 
+    private void initializeUIElements() {
+        recyclerView = findViewById(R.id.rvQuizzes);
+        btnAddQuiz = findViewById(R.id.btnAddQuiz);
+    }
+
+    private void setupListeners() {
+        btnAddQuiz.setOnClickListener(v -> {
+            Intent intent = new Intent(QuizzesActivity.this, AddQuizActivity.class);
+            startActivityForResult(intent, 2);
+        });
+    }
+
+    private void setupRecyclerView() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
         quizzesAdapter = new QuizzesAdapter(quizUseCase.getAllQuizzes(), new QuizzesAdapter.OnQuizClickListener() {
             @Override
             public void onQuizClick(QuizDTO quiz) {
-                String quizDetails = "ID: " + quiz.getId() + "\n" +
-                        "Quiz Name: " + quiz.getQuizName() + "\n" +
-                        "Creation Date: " + quiz.getDate() + "\n" +
-                        "Number of Questions: " + questionQuizUseCase.getNumberOfQuestionsForQuiz(quiz.getId());
+                String quizDetails = String.format(
+                        "ID: %d\nQuiz Name: %s\nCreation Date: %s\nNumber of Questions: %d",
+                        quiz.getId(),
+                        quiz.getQuizName(),
+                        quiz.getDate(),
+                        questionQuizUseCase.getNumberOfQuestionsForQuiz(quiz.getId())
+                );
 
                 new AlertDialog.Builder(QuizzesActivity.this)
                         .setTitle("Quiz Details")
@@ -75,13 +98,6 @@ public class QuizzesActivity extends AppCompatActivity {
         });
 
         recyclerView.setAdapter(quizzesAdapter);
-
-        loadQuizzes();
-
-        btnAddQuiz.setOnClickListener(v -> {
-            Intent intent = new Intent(QuizzesActivity.this, AddQuizActivity.class);
-            startActivityForResult(intent, 2);
-        });
     }
 
     private void loadQuizzes() {

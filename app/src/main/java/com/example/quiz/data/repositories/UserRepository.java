@@ -26,32 +26,17 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public User getUserById(int userId) {
-        Cursor cursor = null;
-        try {
-            cursor = queryUserById(userId);
-            if (cursor.moveToFirst()) {
-                return mapCursorToUser(cursor);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        try (Cursor cursor = queryUserById(userId)) {
+            return cursor != null && cursor.moveToFirst() ? mapCursorToUser(cursor) : null;
         }
-        return null;
     }
 
     @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        Cursor cursor = null;
-        try {
-            cursor = queryAllUsers();
+        try (Cursor cursor = queryAllUsers()) {
             while (cursor != null && cursor.moveToNext()) {
                 users.add(mapCursorToUser(cursor));
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
             }
         }
         return users;
@@ -59,9 +44,7 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public User insertUser(User user) {
-        ContentValues values = mapUserToContentValues(user);
-        long result = dbHelper.getWritableDatabase().insert(TABLE_USERS, null, values);
-
+        long result = dbHelper.getWritableDatabase().insert(TABLE_USERS, null, mapUserToContentValues(user));
         if (result != -1) {
             user.setId((int) result);
             return user;
@@ -71,40 +54,28 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public boolean updateUser(User user) {
-        ContentValues values = mapUserToContentValues(user);
-        int rowsAffected = dbHelper.getWritableDatabase().update(
+        return dbHelper.getWritableDatabase().update(
                 TABLE_USERS,
-                values,
+                mapUserToContentValues(user),
                 COLUMN_ID + " = ?",
                 new String[]{String.valueOf(user.getId())}
-        );
-        return rowsAffected > 0;
+        ) > 0;
     }
 
     @Override
     public boolean deleteUser(int userId) {
-        int rowsAffected = dbHelper.getWritableDatabase().delete(
+        return dbHelper.getWritableDatabase().delete(
                 TABLE_USERS,
                 COLUMN_ID + " = ?",
                 new String[]{String.valueOf(userId)}
-        );
-        return rowsAffected > 0;
+        ) > 0;
     }
 
     @Override
     public User login(String email, String password) {
-        Cursor cursor = null;
-        try {
-            cursor = queryUserByEmailAndPassword(email, password);
-            if (cursor.moveToFirst()) {
-                return mapCursorToUser(cursor);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        try (Cursor cursor = queryUserByEmailAndPassword(email, password)) {
+            return cursor != null && cursor.moveToFirst() ? mapCursorToUser(cursor) : null;
         }
-        return null;
     }
 
     private Cursor queryUserById(int userId) {

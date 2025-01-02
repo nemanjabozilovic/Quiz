@@ -32,18 +32,13 @@ public class QuestionRepository implements IQuestionRepository {
     @Override
     public Question getQuestionById(int questionId) {
         SQLiteDatabase database = dbHelper.getReadableDatabase();
-        Cursor cursor = null;
-        try {
-            String query = "SELECT * FROM " + TABLE_QUESTIONS + " WHERE " + COLUMN_ID + " = ?";
-            cursor = database.rawQuery(query, new String[]{String.valueOf(questionId)});
-            if (cursor != null && cursor.moveToFirst()) {
-                return mapCursorToQuestion(cursor);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        Cursor cursor = database.rawQuery("SELECT * FROM " + TABLE_QUESTIONS + " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(questionId)});
+        if (cursor.moveToFirst()) {
+            Question question = mapCursorToQuestion(cursor);
+            cursor.close();
+            return question;
         }
+        cursor.close();
         return null;
     }
 
@@ -51,64 +46,44 @@ public class QuestionRepository implements IQuestionRepository {
     public List<Question> getAllQuestions() {
         List<Question> questions = new ArrayList<>();
         SQLiteDatabase database = dbHelper.getReadableDatabase();
-        Cursor cursor = null;
-        try {
-            String query = "SELECT * FROM " + TABLE_QUESTIONS;
-            cursor = database.rawQuery(query, null);
-            if (cursor.moveToFirst()) {
-                do {
-                    questions.add(mapCursorToQuestion(cursor));
-                } while (cursor.moveToNext());
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        Cursor cursor = database.rawQuery("SELECT * FROM " + TABLE_QUESTIONS, null);
+        while (cursor.moveToNext()) {
+            questions.add(mapCursorToQuestion(cursor));
         }
+        cursor.close();
         return questions;
     }
 
     @Override
     public boolean insertQuestion(Question question) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        ContentValues values = mapQuestionToContentValues(question);
-        long result = database.insert(TABLE_QUESTIONS, null, values);
-        return result != -1;
+        return database.insert(TABLE_QUESTIONS, null, mapQuestionToContentValues(question)) != -1;
     }
 
     @Override
     public boolean updateQuestion(Question question) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        ContentValues values = mapQuestionToContentValues(question);
-        String whereClause = COLUMN_ID + " = ?";
-        String[] whereArgs = {String.valueOf(question.getId())};
-
-        int rowsUpdated = database.update(TABLE_QUESTIONS, values, whereClause, whereArgs);
-        return rowsUpdated > 0;
+        return database.update(TABLE_QUESTIONS, mapQuestionToContentValues(question), COLUMN_ID + " = ?", new String[]{String.valueOf(question.getId())}) > 0;
     }
 
     @Override
     public boolean deleteQuestion(int questionId) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
-        String whereClause = COLUMN_ID + " = ?";
-        String[] whereArgs = {String.valueOf(questionId)};
-
-        int rowsDeleted = database.delete(TABLE_QUESTIONS, whereClause, whereArgs);
-        return rowsDeleted > 0;
+        return database.delete(TABLE_QUESTIONS, COLUMN_ID + " = ?", new String[]{String.valueOf(questionId)}) > 0;
     }
 
     private Question mapCursorToQuestion(Cursor cursor) {
-        int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-        String text = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TEXT));
-        String option1 = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_1));
-        String option2 = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_2));
-        String option3 = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_3));
-        String option4 = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_4));
-        String option5 = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_5));
-        String correctAnswer = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CORRECT_ANSWER));
-        int numberOfPoints = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NUMBER_OF_POINTS));
-
-        return new Question(id, text, option1, option2, option3, option4, option5, correctAnswer, numberOfPoints);
+        return new Question(
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TEXT)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_1)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_2)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_3)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_4)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_OPTION_5)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CORRECT_ANSWER)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NUMBER_OF_POINTS))
+        );
     }
 
     private ContentValues mapQuestionToContentValues(Question question) {

@@ -1,16 +1,26 @@
 package com.example.quiz.data.models;
 
 public class UserQuiz {
+    private int id;
     private int userId;
     private int quizId;
     private int totalNumberOfPoints;
 
     public UserQuiz() {}
 
-    public UserQuiz(int userId, int quizId, int totalNumberOfPoints) {
+    public UserQuiz(int id, int userId, int quizId, int totalNumberOfPoints) {
+        this.id = id;
         this.userId = userId;
         this.quizId = quizId;
         this.totalNumberOfPoints = totalNumberOfPoints;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getUserId() {

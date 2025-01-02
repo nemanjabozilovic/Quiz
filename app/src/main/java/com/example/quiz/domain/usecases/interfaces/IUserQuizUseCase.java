@@ -7,6 +7,7 @@ import java.util.List;
 public interface IUserQuizUseCase {
     List<UserQuizDTO> getUsersForQuiz(int quizId);
     List<UserQuizDTO> getQuizzesForUser(int userId);
-    void insertUserQuiz(UserQuizDTO userQuizDTO);
-    void deleteUserQuiz(int userId, int quizId);
+    long insertUserQuiz(UserQuizDTO userQuizDTO);
+    long deleteUserQuiz(int userId, int quizId);
+    List<UserQuizDTO> getAllUserQuizzes();
 }

@@ -25,32 +25,24 @@ public class UserRolesRepository implements IUserRolesRepository {
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, userId);
         values.put(COLUMN_ROLE_ID, roleId);
-        long result = dbHelper.getWritableDatabase().insert(TABLE_USER_ROLES, null, values);
-        return result != -1;
+        return dbHelper.getWritableDatabase().insert(TABLE_USER_ROLES, null, values) != -1;
     }
 
     @Override
     public boolean removeRoleFromUser(int userId, int roleId) {
-        int rowsAffected = dbHelper.getWritableDatabase().delete(
+        return dbHelper.getWritableDatabase().delete(
                 TABLE_USER_ROLES,
                 COLUMN_USER_ID + " = ? AND " + COLUMN_ROLE_ID + " = ?",
                 new String[]{String.valueOf(userId), String.valueOf(roleId)}
-        );
-        return rowsAffected > 0;
+        ) > 0;
     }
 
     @Override
     public List<Integer> getRolesByUserId(int userId) {
         List<Integer> roleIds = new ArrayList<>();
-        Cursor cursor = null;
-        try {
-            cursor = queryRolesByUserId(userId);
+        try (Cursor cursor = queryRolesByUserId(userId)) {
             while (cursor != null && cursor.moveToNext()) {
                 roleIds.add(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ROLE_ID)));
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
             }
         }
         return roleIds;
@@ -59,15 +51,9 @@ public class UserRolesRepository implements IUserRolesRepository {
     @Override
     public List<Integer> getUsersByRoleId(int roleId) {
         List<Integer> userIds = new ArrayList<>();
-        Cursor cursor = null;
-        try {
-            cursor = queryUsersByRoleId(roleId);
+        try (Cursor cursor = queryUsersByRoleId(roleId)) {
             while (cursor != null && cursor.moveToNext()) {
                 userIds.add(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID)));
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
             }
         }
         return userIds;

@@ -6,6 +6,15 @@
     android:padding="16dp"
     android:fitsSystemWindows="true">
 
+    <TextView
+        android:id="@+id/tvQuizzesHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/quizzes"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvQuizzes"
         android:layout_width="match_parent"
@@ -19,4 +28,5 @@
         android:text="@string/button_add_quiz"
         android:textSize="18sp"
         android:layout_marginTop="16dp" />
+
 </LinearLayout>

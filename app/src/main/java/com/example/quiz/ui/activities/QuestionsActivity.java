@@ -20,7 +20,6 @@ import com.example.quiz.ui.adapters.QuestionsAdapter;
 import java.util.List;
 
 public class QuestionsActivity extends AppCompatActivity {
-
     private QuestionsAdapter questionsAdapter;
     private QuestionUseCase questionUseCase;
 
@@ -29,60 +28,94 @@ public class QuestionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_questions);
 
-        RecyclerView recyclerView = findViewById(R.id.rvQuestions);
-        Button btnAddQuestion = findViewById(R.id.btnAddQuestion);
+        initializeDatabase();
+        setupRecyclerView();
+        setupAddQuestionButton();
+        loadQuestions();
+    }
 
+    private void initializeDatabase() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         questionUseCase = new QuestionUseCase(new QuestionRepository(dbHelper));
+    }
 
+    private void setupRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.rvQuestions);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        questionsAdapter = new QuestionsAdapter(questionUseCase.getAllQuestions(), new QuestionsAdapter.OnQuestionClickListener() {
-            @Override
-            public void onQuestionClick(QuestionDTO question) {
-                String questionDetails = "ID: " + question.getId() + "\n" +
-                        "Question: " + question.getText() + "\n" +
-                        "Correct Answer: " + question.getCorrectAnswer() + "\n" +
-                        "Number of Points: " + question.getNumberOfPoints();
+        questionsAdapter = new QuestionsAdapter(
+                questionUseCase.getAllQuestions(),
+                new QuestionsAdapter.OnQuestionClickListener() {
+                    @Override
+                    public void onQuestionClick(QuestionDTO question) {
+                        showQuestionDetailsDialog(question);
+                    }
 
-                new AlertDialog.Builder(QuestionsActivity.this)
-                        .setTitle("Question Details")
-                        .setMessage(questionDetails)
-                        .setPositiveButton("OK", null)
-                        .show();
-            }
+                    @Override
+                    public void onEditClick(QuestionDTO question) {
+                        navigateToEditQuestionActivity(question);
+                    }
 
-            @Override
-            public void onEditClick(QuestionDTO question) {
-                Intent intent = new Intent(QuestionsActivity.this, EditQuestionActivity.class);
-                intent.putExtra("question", question);
-                startActivityForResult(intent, 1);
-            }
-
-            @Override
-            public void onDeleteClick(int questionId) {
-                if (questionUseCase.deleteQuestion(questionId)) {
-                    Toast.makeText(QuestionsActivity.this, "Question deleted successfully.", Toast.LENGTH_SHORT).show();
-                    loadQuestions();
-                } else {
-                    Toast.makeText(QuestionsActivity.this, "Error deleting question.", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onDeleteClick(int questionId) {
+                        handleDeleteQuestion(questionId);
+                    }
                 }
-            }
-        });
+        );
 
         recyclerView.setAdapter(questionsAdapter);
+    }
 
-        loadQuestions();
-
-        btnAddQuestion.setOnClickListener(v -> {
-            Intent intent = new Intent(QuestionsActivity.this, AddQuestionActivity.class);
-            startActivityForResult(intent, 2);
-        });
+    private void setupAddQuestionButton() {
+        Button btnAddQuestion = findViewById(R.id.btnAddQuestion);
+        btnAddQuestion.setOnClickListener(v -> navigateToAddQuestionActivity());
     }
 
     private void loadQuestions() {
         List<QuestionDTO> questions = questionUseCase.getAllQuestions();
         questionsAdapter.setQuestions(questions);
+    }
+
+    private void showQuestionDetailsDialog(QuestionDTO question) {
+        String questionDetails = String.format(
+                "ID: %d\nQuestion: %s\nCorrect Answer: %s\nNumber of Points: %d",
+                question.getId(),
+                question.getText(),
+                question.getCorrectAnswer(),
+                question.getNumberOfPoints()
+        );
+
+        new AlertDialog.Builder(this)
+                .setTitle("Question Details")
+                .setMessage(questionDetails)
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
+    private void navigateToEditQuestionActivity(QuestionDTO question) {
+        Intent intent = new Intent(this, EditQuestionActivity.class);
+        intent.putExtra("question", question);
+        startActivityForResult(intent, 1);
+    }
+
+    private void navigateToAddQuestionActivity() {
+        Intent intent = new Intent(this, AddQuestionActivity.class);
+        startActivityForResult(intent, 2);
+    }
+
+    private void handleDeleteQuestion(int questionId) {
+        boolean isDeleted = questionUseCase.deleteQuestion(questionId);
+
+        if (isDeleted) {
+            showToast("Question deleted successfully.");
+            loadQuestions();
+        } else {
+            showToast("Error deleting question.");
+        }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override

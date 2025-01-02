@@ -22,9 +22,7 @@ import com.example.quiz.domain.usecases.implementation.UserUseCase;
 import com.example.quiz.domain.usecases.interfaces.IUserUseCase;
 
 public class MainActivity extends AppCompatActivity {
-
-    private EditText emailEditText;
-    private EditText passwordEditText;
+    private EditText emailEditText, passwordEditText;
     private Button loginButton;
     private IUserUseCase userUseCase;
 

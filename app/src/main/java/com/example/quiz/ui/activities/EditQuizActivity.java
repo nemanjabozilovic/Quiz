@@ -14,9 +14,7 @@ import com.example.quiz.data.repositories.QuestionQuizRepository;
 import com.example.quiz.data.repositories.QuestionRepository;
 import com.example.quiz.data.repositories.QuizRepository;
 import com.example.quiz.domain.mappers.QuestionConversionUtils;
-import com.example.quiz.domain.mappers.QuestionQuizMapper;
 import com.example.quiz.domain.models.QuestionDTO;
-import com.example.quiz.domain.models.QuestionQuizDTO;
 import com.example.quiz.domain.models.QuizDTO;
 import com.example.quiz.domain.usecases.implementation.QuestionQuizUseCase;
 import com.example.quiz.domain.usecases.implementation.QuizUseCase;
@@ -25,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EditQuizActivity extends AppCompatActivity {
-
     private EditText etQuizName, etDate;
     private QuizDTO quizDTO;
     private QuizUseCase quizUseCase;
@@ -38,55 +35,41 @@ public class EditQuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_quiz);
 
-        etQuizName = findViewById(R.id.etQuizName);
-        etDate = findViewById(R.id.etDate);
-        Button btnSave = findViewById(R.id.btnSave);
-        Button btnEditQuestions = findViewById(R.id.btnEditQuestions);
+        initializeUIElements();
+        initializeDependencies();
 
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        quizUseCase = new QuizUseCase(new QuizRepository(dbHelper), new QuestionQuizRepository(dbHelper));
-        questionQuizUseCase = new QuestionQuizUseCase(new QuestionQuizRepository(dbHelper), new QuestionRepository(dbHelper));
-
-        quizDTO = getIntent().getParcelableExtra("quiz");
-        if (quizDTO != null) {
-            loadQuizData(quizDTO);
-            selectedQuestions = questionQuizUseCase.getQuestionsForQuiz(quizDTO.getId());
-        } else {
-            Toast.makeText(this, "Error: Quiz data not found.", Toast.LENGTH_SHORT).show();
+        if (!loadQuizFromIntent()) {
+            showToast("Error: Quiz data not found.");
             finish();
             return;
         }
 
-        btnSave.setOnClickListener(v -> {
-            if (validateInputs()) {
-                updateQuizDetails();
-
-                boolean isUpdated = quizUseCase.updateQuiz(quizDTO);
-                if (isUpdated) {
-                    boolean questionsUpdated = questionQuizUseCase.updateQuestionsForQuiz(
-                            quizDTO.getId(),
-                            QuestionConversionUtils.convertQuestionDTOsToQuestionQuiz(selectedQuestions, quizDTO.getId())
-                    );
-
-                    if (questionsUpdated) {
-                        Toast.makeText(this, "Quiz updated successfully.", Toast.LENGTH_SHORT).show();
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("updatedQuiz", quizDTO);
-                        setResult(RESULT_OK, resultIntent);
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Error updating quiz questions.", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(this, "Error updating quiz details. Please try again.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        btnEditQuestions.setOnClickListener(v -> openQuestionSelectionActivity());
+        setupSaveButtonListener();
+        setupEditQuestionsButtonListener();
     }
 
-    private void loadQuizData(QuizDTO quiz) {
+    private void initializeUIElements() {
+        etQuizName = findViewById(R.id.etQuizName);
+        etDate = findViewById(R.id.etDate);
+    }
+
+    private void initializeDependencies() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        quizUseCase = new QuizUseCase(new QuizRepository(dbHelper), new QuestionQuizRepository(dbHelper));
+        questionQuizUseCase = new QuestionQuizUseCase(new QuestionQuizRepository(dbHelper), new QuestionRepository(dbHelper));
+    }
+
+    private boolean loadQuizFromIntent() {
+        quizDTO = getIntent().getParcelableExtra("quiz");
+        if (quizDTO != null) {
+            populateQuizData(quizDTO);
+            selectedQuestions = questionQuizUseCase.getQuestionsForQuiz(quizDTO.getId());
+            return true;
+        }
+        return false;
+    }
+
+    private void populateQuizData(QuizDTO quiz) {
         etQuizName.setText(quiz.getQuizName());
         etDate.setText(quiz.getDate());
 
@@ -94,21 +77,74 @@ public class EditQuizActivity extends AppCompatActivity {
         originalDate = quiz.getDate();
     }
 
+    private void setupSaveButtonListener() {
+        Button btnSave = findViewById(R.id.btnSave);
+        btnSave.setOnClickListener(v -> {
+            if (validateInputs()) {
+                updateQuizDetails();
+                handleQuizUpdate();
+            }
+        });
+    }
+
+    private void setupEditQuestionsButtonListener() {
+        Button btnEditQuestions = findViewById(R.id.btnEditQuestions);
+        btnEditQuestions.setOnClickListener(v -> openQuestionSelectionActivity());
+    }
+
     private boolean validateInputs() {
         if (etQuizName.getText().toString().trim().isEmpty()) {
-            Toast.makeText(this, "Quiz name is required.", Toast.LENGTH_SHORT).show();
+            showToast("Quiz name is required.");
             return false;
         }
         if (etDate.getText().toString().trim().isEmpty()) {
-            Toast.makeText(this, "Date is required.", Toast.LENGTH_SHORT).show();
+            showToast("Date is required.");
             return false;
         }
         return true;
     }
 
     private void updateQuizDetails() {
-        quizDTO.setQuizName(etQuizName.getText().toString().trim());
-        quizDTO.setDate(etDate.getText().toString().trim());
+        String newQuizName = etQuizName.getText().toString().trim();
+        String newDate = etDate.getText().toString().trim();
+
+        if (!newQuizName.equals(originalQuizName)) {
+            quizDTO.setQuizName(newQuizName);
+        }
+
+        if (!newDate.equals(originalDate)) {
+            quizDTO.setDate(newDate);
+        }
+    }
+
+    private void handleQuizUpdate() {
+        boolean isQuizUpdated = quizUseCase.updateQuiz(quizDTO);
+
+        if (isQuizUpdated) {
+            boolean areQuestionsUpdated = updateQuizQuestions();
+            if (areQuestionsUpdated) {
+                showToast("Quiz updated successfully.");
+                returnUpdatedQuiz();
+            } else {
+                showToast("Error updating quiz questions.");
+            }
+        } else {
+            showToast("Error updating quiz details. Please try again.");
+        }
+    }
+
+    private boolean updateQuizQuestions() {
+        return questionQuizUseCase.updateQuestionsForQuiz(
+                quizDTO.getId(),
+                QuestionConversionUtils.convertQuestionDTOsToQuestionQuiz(selectedQuestions, quizDTO.getId())
+        );
+    }
+
+    private void returnUpdatedQuiz() {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("updatedQuiz", quizDTO);
+        setResult(RESULT_OK, resultIntent);
+        finish();
     }
 
     private void openQuestionSelectionActivity() {
@@ -123,17 +159,11 @@ public class EditQuizActivity extends AppCompatActivity {
 
         if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             selectedQuestions = data.getParcelableArrayListExtra("selectedQuestions");
-            Toast.makeText(this, selectedQuestions.size() + " questions updated for the quiz.", Toast.LENGTH_SHORT).show();
+            showToast(selectedQuestions.size() + " questions updated for the quiz.");
         }
     }
 
-    private List<QuestionQuizDTO> convertToQuestionQuizDTO(List<QuestionDTO> questions) {
-        List<QuestionQuizDTO> questionQuizDTOs = new ArrayList<>();
-        for (QuestionDTO question : questions) {
-            QuestionQuizDTO dto = QuestionQuizDTO.fromQuestionDTO(question);
-            dto.setQuizId(quizDTO.getId());
-            questionQuizDTOs.add(dto);
-        }
-        return questionQuizDTOs;
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

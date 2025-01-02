@@ -37,13 +37,24 @@ public class UserQuizUseCase implements IUserQuizUseCase {
     }
 
     @Override
-    public void insertUserQuiz(UserQuizDTO userQuizDTO) {
+    public long insertUserQuiz(UserQuizDTO userQuizDTO) {
         UserQuiz userQuiz = UserQuizMapper.toModel(userQuizDTO);
-        userQuizRepository.insertUserQuiz(userQuiz);
+        return userQuizRepository.insertUserQuiz(userQuiz);
     }
 
     @Override
-    public void deleteUserQuiz(int userId, int quizId) {
-        userQuizRepository.deleteUserQuiz(userId, quizId);
+    public long deleteUserQuiz(int userId, int quizId) {
+        return userQuizRepository.deleteUserQuiz(userId, quizId);
+    }
+
+    @Override
+    public List<UserQuizDTO> getAllUserQuizzes() {
+        List<UserQuiz> userQuizzes = userQuizRepository.getAllUserQuizzes();
+        List<UserQuizDTO> userQuizDTOs = new ArrayList<>();
+        for (UserQuiz userQuiz : userQuizzes) {
+            userQuizDTOs.add(UserQuizMapper.toDTO(userQuiz));
+        }
+
+        return userQuizDTOs;
     }
 }

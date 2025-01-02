@@ -25,8 +25,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public class AddQuizActivity extends AppCompatActivity {
-
     private EditText etQuizName, etDate;
+    private Button btnAddQuiz, btnAddQuestions;
     private QuizUseCase quizUseCase;
     private QuestionQuizUseCase questionQuizUseCase;
     private List<QuestionDTO> selectedQuestions = new ArrayList<>();
@@ -36,32 +36,42 @@ public class AddQuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_quiz);
 
+        initializeUIElements();
+        initializeDependencies();
+        setupListeners();
+    }
+
+    private void initializeUIElements() {
         etQuizName = findViewById(R.id.etQuizName);
         etDate = findViewById(R.id.etDate);
-        Button btnAddQuiz = findViewById(R.id.btnAddQuiz);
-        Button btnAddQuestions = findViewById(R.id.btnAddQuestions);
+        btnAddQuiz = findViewById(R.id.btnAddQuiz);
+        btnAddQuestions = findViewById(R.id.btnAddQuestions);
+    }
 
+    private void initializeDependencies() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         quizUseCase = new QuizUseCase(new QuizRepository(dbHelper), new QuestionQuizRepository(dbHelper));
         questionQuizUseCase = new QuestionQuizUseCase(new QuestionQuizRepository(dbHelper), new QuestionRepository(dbHelper));
+    }
 
-        etDate.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            int year = calendar.get(Calendar.YEAR);
-            int month = calendar.get(Calendar.MONTH);
-            int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
-                String selectedDate = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
-                etDate.setText(selectedDate);
-            }, year, month, day);
-
-            datePickerDialog.show();
-        });
-
+    private void setupListeners() {
+        etDate.setOnClickListener(v -> showDatePicker());
         btnAddQuestions.setOnClickListener(v -> openQuestionSelectionActivity());
-
         btnAddQuiz.setOnClickListener(v -> addQuiz());
+    }
+
+    private void showDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, year1, month1, dayOfMonth) -> {
+            String selectedDate = dayOfMonth + "/" + (month1 + 1) + "/" + year1;
+            etDate.setText(selectedDate);
+        }, year, month, day);
+
+        datePickerDialog.show();
     }
 
     private void openQuestionSelectionActivity() {
@@ -112,7 +122,7 @@ public class AddQuizActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            Toast.makeText(this, "Failed to create quiz", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to create quiz.", Toast.LENGTH_SHORT).show();
         }
     }
 }

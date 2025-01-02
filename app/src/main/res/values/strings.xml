@@ -7,7 +7,7 @@
     <string name="users">Users</string>
     <string name="questions">Questions</string>
     <string name="quizzes">Quizzes</string>
-    <string name="start_quiz">Start Quiz</string>
+    <string name="select_quiz">Select Quiz</string>
     <string name="logout">Logout</string>
     <string name="button_add_user">Add User</string>
     <string name="text_user_name">User Name</string>
@@ -28,7 +28,7 @@
     <string name="question_option_5">Option 5</string>
     <string name="question_correct_answer">Correct Answer</string>
     <string name="question_points">Points</string>
-    <string name="button_start_quiz">Start Quiz</string>
+    <string name="button_select_quiz">Select Quiz</string>
     <string name="question_placeholder">Enter question text</string>
     <string name="button_add_question">Add Question</string>
     <string name="button_edit_question">Edit Question</string>
@@ -39,4 +39,14 @@
     <string name="button_add_questions_to_quiz">Add Selected Questions</string>
     <string name="button_add_questions">Add Questions</string>
     <string name="button_edit_questions">Edit Questions</string>
+    <string name="take_quiz_question_text">Question text will appear here</string>
+    <string name="next_question">Next Question</string>
+    <string name="button_submit">Submit</string>
+    <string name="go_to_home">Return To Home Screen</string>
+    <string-array name="sort_options">
+        <item>Sort by User</item>
+        <item>Sort by Quiz</item>
+        <item>Sort by Total Points</item>
+    </string-array>
+    <string name="results_history">Results History</string>
 </resources>

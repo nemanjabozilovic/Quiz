@@ -6,6 +6,16 @@
     android:padding="16dp"
     android:fitsSystemWindows="true">
 
+    <TextView
+        android:id="@+id/tvUsersHeading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/users"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="10dp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvUsers"
         android:layout_width="match_parent"

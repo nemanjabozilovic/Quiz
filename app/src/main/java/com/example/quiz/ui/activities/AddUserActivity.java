@@ -30,6 +30,7 @@ import java.util.List;
 public class AddUserActivity extends AppCompatActivity {
     private EditText etFirstName, etLastName, etEmail, etPassword;
     private Spinner spinnerRole;
+    private Button btnSave;
     private IUserUseCase userUseCase;
     private IUserRolesUseCase userRolesUseCase;
     private List<RoleDTO> rolesList = new ArrayList<>();
@@ -39,13 +40,22 @@ public class AddUserActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_user);
 
+        initializeUIElements();
+        initializeDependencies();
+        loadRolesIntoSpinner();
+        setupListeners();
+    }
+
+    private void initializeUIElements() {
         etFirstName = findViewById(R.id.etFirstName);
         etLastName = findViewById(R.id.etLastName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         spinnerRole = findViewById(R.id.spinnerRole);
-        Button btnSave = findViewById(R.id.btnSave);
+        btnSave = findViewById(R.id.btnSave);
+    }
 
+    private void initializeDependencies() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         userUseCase = new UserUseCase(
                 new UserRepository(dbHelper),
@@ -62,28 +72,13 @@ public class AddUserActivity extends AppCompatActivity {
         if (rolesList.isEmpty()) {
             Toast.makeText(this, "No roles available. Please add roles first.", Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
-        loadRolesIntoSpinner();
+    }
 
+    private void setupListeners() {
         btnSave.setOnClickListener(v -> {
             if (validateInputs()) {
-                UserDTO newUserDTO = createUserDTO();
-                boolean isInserted = userUseCase.insertUser(newUserDTO);
-
-                if (isInserted) {
-                    int selectedRolePosition = spinnerRole.getSelectedItemPosition();
-                    int selectedRoleId = rolesList.get(selectedRolePosition).getId();
-                    userRolesUseCase.assignRoleToUser(newUserDTO.getId(), selectedRoleId);
-
-                    Toast.makeText(AddUserActivity.this, "User added successfully.", Toast.LENGTH_SHORT).show();
-                    Intent resultIntent = new Intent();
-                    resultIntent.putExtra("newUser", newUserDTO);
-                    setResult(RESULT_OK, resultIntent);
-                    finish();
-                } else {
-                    Toast.makeText(AddUserActivity.this, "Error adding user. Please try again.", Toast.LENGTH_SHORT).show();
-                }
+                saveUser();
             }
         });
     }
@@ -117,6 +112,32 @@ public class AddUserActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    private void saveUser() {
+        UserDTO newUserDTO = createUserDTO();
+        boolean isInserted = userUseCase.insertUser(newUserDTO);
+
+        if (isInserted) {
+            assignRoleToUser(newUserDTO);
+            navigateBackWithSuccess(newUserDTO);
+        } else {
+            Toast.makeText(this, "Error adding user. Please try again.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void assignRoleToUser(UserDTO user) {
+        int selectedRolePosition = spinnerRole.getSelectedItemPosition();
+        int selectedRoleId = rolesList.get(selectedRolePosition).getId();
+        userRolesUseCase.assignRoleToUser(user.getId(), selectedRoleId);
+    }
+
+    private void navigateBackWithSuccess(UserDTO user) {
+        Toast.makeText(this, "User added successfully.", Toast.LENGTH_SHORT).show();
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("newUser", user);
+        setResult(RESULT_OK, resultIntent);
+        finish();
     }
 
     private UserDTO createUserDTO() {

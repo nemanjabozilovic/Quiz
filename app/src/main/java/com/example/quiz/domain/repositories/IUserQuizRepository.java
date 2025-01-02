@@ -7,6 +7,7 @@ import java.util.List;
 public interface IUserQuizRepository {
     List<UserQuiz> getUsersForQuiz(int quizId);
     List<UserQuiz> getQuizzesForUser(int userId);
-    void insertUserQuiz(UserQuiz userQuiz);
-    void deleteUserQuiz(int userId, int quizId);
+    long insertUserQuiz(UserQuiz userQuiz);
+    long deleteUserQuiz(int userId, int quizId);
+    List<UserQuiz> getAllUserQuizzes();
 }

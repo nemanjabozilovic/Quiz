@@ -24,15 +24,9 @@ public class QuizRepository implements IQuizRepository {
 
     @Override
     public Quiz getQuizById(int quizId) {
-        Cursor cursor = null;
-        try {
-            cursor = queryQuizById(quizId);
-            if (cursor != null && cursor.moveToFirst()) {
+        try (Cursor cursor = queryQuizById(quizId)) {
+            if (cursor.moveToFirst()) {
                 return mapCursorToQuiz(cursor);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
             }
         }
         return null;
@@ -41,15 +35,9 @@ public class QuizRepository implements IQuizRepository {
     @Override
     public List<Quiz> getAllQuizzes() {
         List<Quiz> quizzes = new ArrayList<>();
-        Cursor cursor = null;
-        try {
-            cursor = queryAllQuizzes();
-            while (cursor != null && cursor.moveToNext()) {
+        try (Cursor cursor = queryAllQuizzes()) {
+            while (cursor.moveToNext()) {
                 quizzes.add(mapCursorToQuiz(cursor));
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
             }
         }
         return quizzes;
@@ -57,37 +45,58 @@ public class QuizRepository implements IQuizRepository {
 
     @Override
     public boolean insertQuiz(Quiz quiz) {
-        ContentValues values = mapQuizToContentValues(quiz);
-        long result = dbHelper.getWritableDatabase().insert(TABLE_QUIZ, null, values);
-        return result != -1;
+        return dbHelper.getWritableDatabase().insert(TABLE_QUIZ, null, mapQuizToContentValues(quiz)) != -1;
     }
 
     @Override
     public boolean updateQuiz(Quiz quiz) {
-        ContentValues values = mapQuizToContentValues(quiz);
-        int rowsAffected = dbHelper.getWritableDatabase().update(TABLE_QUIZ, values, COLUMN_ID + " = ?", new String[]{String.valueOf(quiz.getId())});
-        return rowsAffected > 0;
+        return dbHelper.getWritableDatabase().update(
+                TABLE_QUIZ,
+                mapQuizToContentValues(quiz),
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(quiz.getId())}
+        ) > 0;
     }
 
     @Override
     public boolean deleteQuiz(int quizId) {
-        int rowsAffected = dbHelper.getWritableDatabase().delete(TABLE_QUIZ, COLUMN_ID + " = ?", new String[]{String.valueOf(quizId)});
-        return rowsAffected > 0;
+        return dbHelper.getWritableDatabase().delete(
+                TABLE_QUIZ,
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(quizId)}
+        ) > 0;
     }
 
     private Cursor queryQuizById(int quizId) {
-        return dbHelper.getReadableDatabase().query(TABLE_QUIZ, null, COLUMN_ID + " = ?", new String[]{String.valueOf(quizId)}, null, null, null);
+        return dbHelper.getReadableDatabase().query(
+                TABLE_QUIZ,
+                null,
+                COLUMN_ID + " = ?",
+                new String[]{String.valueOf(quizId)},
+                null,
+                null,
+                null
+        );
     }
 
     private Cursor queryAllQuizzes() {
-        return dbHelper.getReadableDatabase().query(TABLE_QUIZ, null, null, null, null, null, null);
+        return dbHelper.getReadableDatabase().query(
+                TABLE_QUIZ,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     private Quiz mapCursorToQuiz(Cursor cursor) {
-        int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-        String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE));
-        String quizName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_QUIZ_NAME));
-        return new Quiz(id, quizName, date);
+        return new Quiz(
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_QUIZ_NAME)),
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
+        );
     }
 
     private ContentValues mapQuizToContentValues(Quiz quiz) {

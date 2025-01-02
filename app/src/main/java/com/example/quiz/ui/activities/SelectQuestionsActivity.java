@@ -20,26 +20,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SelectQuestionsActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private Button btnSaveQuestions;
     private SelectableQuestionsAdapter adapter;
+    private List<QuestionDTO> questions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_questions);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        Button btnSaveQuestions = findViewById(R.id.btnSaveQuestions);
+        initializeDependencies();
+        initializeUI();
+        setupListeners();
+    }
 
+    private void initializeDependencies() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         QuestionRepository questionRepository = new QuestionRepository(dbHelper);
-        List<QuestionDTO> questions = QuestionMapper.toDTO(questionRepository.getAllQuestions());
+        questions = QuestionMapper.toDTO(questionRepository.getAllQuestions());
+    }
 
-        adapter = new SelectableQuestionsAdapter(questions, question -> {
-        });
+    private void initializeUI() {
+        recyclerView = findViewById(R.id.recyclerView);
+        btnSaveQuestions = findViewById(R.id.btnSaveQuestions);
 
+        adapter = new SelectableQuestionsAdapter(questions, question -> {});
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+    }
 
+    private void setupListeners() {
         btnSaveQuestions.setOnClickListener(v -> saveSelectedQuestions());
     }
 

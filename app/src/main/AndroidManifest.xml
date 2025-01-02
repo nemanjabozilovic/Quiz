@@ -64,6 +64,18 @@
             android:name=".ui.activities.SelectQuestionsActivity"
             android:theme="@style/Theme.Quiz">
         </activity>
+        <activity
+            android:name=".ui.activities.SelectQuizActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
+        <activity
+            android:name=".ui.activities.TakeQuizActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
+        <activity
+            android:name=".ui.activities.ResultsHistoryActivity"
+            android:theme="@style/Theme.Quiz">
+        </activity>
     </application>
 
 </manifest>
